@@ -1,0 +1,15 @@
+http://127.0.0.1:22021
+
+
+
+root * src
+
+file_server
+templates
+encode gzip
+
+try_files {path}.html {path}
+rewrite /docs/*         /docs/index.html
+
+# redirect to /docs/
+redir   /               /docs/
