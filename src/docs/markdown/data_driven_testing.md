@@ -1,4 +1,4 @@
-# Data Driven Testing
+# 数据驱动测试
 
 通常情况下，通过多次运行相同的测试代码，使用不同的输入和预期结果是很有用的。Spock的数据驱动测试支持使得这成为一项一流的特性。
 
@@ -198,7 +198,7 @@ class MathSpec extends Specification {
     1 | 3 || 3
     7 | 4 || 7
     0 | 0 || 0
-
+    
     d ; e ;; f
     1 ; 3 ;; 3
     7 ; 4 ;; 7
@@ -308,3 +308,50 @@ c << [3, 7, 0]
 
 
 
+## 多变量数据管道
+
+如果数据提供者在每次迭代中返回多个值（作为Groovy可迭代对象），它可以同时连接到多个数据变量。这种语法与Groovy的多重赋值类似，但在左侧使用方括号而不是圆括号：
+
+<pre><code class="language-groovy">
+@Shared sql = Sql.newInstance("jdbc:h2:mem:", "org.h2.Driver")
+
+def "maximum of two numbers"() {
+  expect:
+  Math.max(a, b) == c
+
+  where:
+  [a, b, c] << sql.rows("select a, b, c from maxdata")
+}
+</code></pre>
+
+不感兴趣的数据值可以使用下划线（`_`）来忽略：
+<pre><code class="language-groovy">
+...
+where:
+[a, b, _, c] << sql.rows("select * from maxdata")
+</code></pre>
+
+多重赋值甚至可以嵌套。以下示例将生成这些迭代：
+
+以下是转换成Markdown表格的形式：
+
+| a        | b   | c   |
+|----------|-----|-----|
+| ['a1', 'a2'] | 'b1' | 'c1' |
+| ['a2', 'a1'] | 'b1' | 'c1' |
+| ['a1', 'a2'] | 'b2' | 'c2' |
+| ['a2', 'a1'] | 'b2' | 'c2' |
+
+
+
+<pre><code class="language-groovy">
+...
+where:
+[a, [b, _, c]] << [
+  ['a1', 'a2'].permutations(),
+  [
+    ['b1', 'd1', 'c1'],
+    ['b2', 'd2', 'c2']
+  ]
+].combinations()
+</code></pre>

@@ -1,4 +1,4 @@
-# Spock Primer
+# Spock指南
 
 本章内容假定你已经具有Groovy和单元测试的基本知识。如果你是Java开发人员，但没有听说过Groovy，请不要担心 —— Groovy会让您觉得非常熟悉！实际上，Groovy的主要设计目标之一是成为Java身边的脚本语言。因此，只需跟随教程，并在需要时查阅Groovy文档即可。
 

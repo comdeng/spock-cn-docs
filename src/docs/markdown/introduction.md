@@ -1,4 +1,4 @@
-# Introduction
+# 简介
 
 
 <img src="/resources/img/spock-logo.png" style="width:200px;text-align:center;margin:10px;">
