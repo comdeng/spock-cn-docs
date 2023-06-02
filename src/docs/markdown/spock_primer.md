@@ -18,44 +18,44 @@
 
 ## 导入（Imports）
 
-```groovy
+<pre><code class="language-groovy">
 import spock.lang.*
-```
+</code></pre>
 
 `spock.lang`包包含了编写测试规范需要用到的关键类型。
 
 
 
 ## 规范（Specification）
-```grrovy
+<pre><code class="language-groovy">
 class MyFirstSpecification extends Specification {
   // fields
   // fixture methods
   // feature methods
   // helper methods
 }
-```
+</code></pre>
 一个规范被表示为一个继承`spock.lang.Specification`的Groovy类。规范的名称通常与规范描述的系统或系统操作有关。例如，`CustomerSpec`、`H264VideoPlayback`和`ASpaceshipAttackedFromTwoSides`都是规范的合理名称。
 
 Specification类包含了一些有用的方法来编写规范。此外，它还指示JUnit使用`Sputnik`（Spock的JUnit运行器）来运行规范。通过`Sputnik`，Spock规范可以在大多数现代Java IDE和构建工具中运行。
 
 ## 字段（Fields）
-```groovy
+<pre><code class="language-groovy">
 def obj = new ClassUnderSpecification()
 def coll = new Collaborator()
-```
+</code></pre>
 
 实例字段是存储规范的夹具对象的好地方。最好的做法是在声明的时候就进行初始化。（从语义上讲，这等同于在`setup()`方法的最开始进行初始化。）存储在实例字段中的对象在特性方法之间不共享。相反，每个特性方法都有自己的对象。这有助于将特性方法相互隔离，也是通常的预期目标。
 
-```groovy
+<pre><code class="language-groovy">
 @Shared res = new VeryExpensiveResource()
-```
+</code></pre>
 
 有时候你需要在特性方法之间共享一个对象。例如，该对象可能创建起来的代价很大，或者你希望特性方法彼此交互。为了实现这个目的，可以声明一个@Shared字段。同样，最好在声明的时候就对字段进行初始化。（从语义上讲，这等同于在`setupSpec()`方法的最开始进行初始化。）
 
-```groovy
+<pre><code class="language-groovy">
 static final PI = 3.141592654
-```
+</code></pre>
 
 静态字段应该仅用于定义常量。否则，使用共享字段是更好的办法，因为它们在共享方面的语义更加明确定义。
 
@@ -63,13 +63,13 @@ static final PI = 3.141592654
 ## 夹具方法（Fixture Methods）
 
 
-```groovy
+<pre><code class="language-groovy">
 def setupSpec() {}    // 运行一次 -  在第一个特性方法之前
 def setup() {}        // 每个特性方法之前运行
 def cleanup() {}      // 每个特性方法之后运行
 def cleanupSpec() {}  // 运行一次 -  在最后一个特性方法之后
 
-```
+</code></pre>
 
 夹具方法(Fixture method)负责设置和清理特性方法(Feture method)运行的环境。通常建议为每个特性方法使用一个新的夹具，这就是 `setup()` 和 `cleanup()` 方法的作用。
 
@@ -135,17 +135,17 @@ Spock内置了对特性方法的每个概念阶段的支持。为此，特性方
 
 ### `when`和`then`块
 
-```groovy
+<pre><code class="language-groovy">
 when: // 刺激
 then: // 响应
-```
+</code></pre>
 
 `when`和`then`块总是一起出现。它们描述了一个刺激和期望的响应。`when`块可以包含任意代码，而`then`块则限制为条件（conditions）、异常条件（exception conditions）、交互（interactions）和变量定义（variable definitions）。一个特性方法可以包含多对`when-then`块。
 
 #### 条件
 条件描述了一个期望的状态，类似于JUnit的断言。然而，条件是以普通的布尔表达式形式编写的，消除了对断言API的需求。（更准确地说，条件也可以产生一个非布尔值，然后根据Groovy的真值进行评估。）让我们看一些条件的实际应用：
 
-```groovy
+<pre><code class="language-groovy">
 when:
 stack.push(elem)
 
@@ -153,22 +153,22 @@ then:
 !stack.empty
 stack.size() == 1
 stack.peek() == elem
-```
+</code></pre>
 
-> 尽量保持每个特性方法中条件的数量较少。一个到五个条件是一个很好的指导原则。如果你有更多条件，需要确认一下是否一次性指定了多个不相关的特性。如果答案是肯定的，建议将特性方法分解为多个较小的方法。如果你的条件只是在值上有所不同，请考虑使用[数据表格](/docs/data_driven_testing.html#data-tables)。
+> 尽量保持每个特性方法中条件的数量较少。一个到五个条件是一个很好的指导原则。如果你有更多条件，需要确认一下是否一次性指定了多个不相关的特性。如果答案是肯定的，建议将特性方法分解为多个较小的方法。如果你的条件只是在值上有所不同，请考虑使用[数据表格](/docs/data_driven_testing#data-tables)。
 
 
 
 如果条件不满足，Spock提供了详细的反馈。让我们尝试将第二个条件改为`stack.size() == 2`，以下是反馈信息：
 
-```groovy
+<pre><code class="language-groovy">
 Condition not satisfied:
 
 stack.size() == 2
 |     |      |
 |     1      false
 [push me]
-```
+</code></pre>
 
 正如你所见，Spock捕获了在评估条件时产生的所有值，并以易于理解的形式呈现出来。是不是很好呢？这样的反馈信息有助于理解条件为何失败，并且方便进行故障排除。
 
@@ -178,12 +178,12 @@ stack.size() == 2
 
 条件是`then`块和`expect`块的重要组成部分。除了对`void`方法的调用和被分类为交互的表达式外，这些块中的所有顶级表达式都会被隐式地视为条件。要在其他地方使用条件，你需要使用Groovy的`assert`关键字来标识它们：
 
-```groovy
+<pre><code class="language-groovy">
 def setup() {
   stack = new Stack()
   assert stack.empty
 }
-```
+</code></pre>
 
 如果显式条件不满足，它将产生与隐式条件相同的良好诊断消息。
 
@@ -193,52 +193,52 @@ def setup() {
 
 异常条件用于描述`when`块应该抛出异常的情况。它们使用`thrown()`方法来定义，传递预期的异常类型。例如，要描述从空栈中弹出应该抛出`EmptyStackException`异常，可以编写如下代码：
 
-```groovy
+<pre><code class="language-groovy">
 when:
 stack.pop()
 
 then:
 thrown(EmptyStackException)
 stack.empty
-```
+</code></pre>
 
 如你所见，异常条件后面可以跟随其他条件（甚至其他块）。这对于指定异常的预期内容特别有用。要访问异常，首先将其绑定到一个变量：
 
-```groovy
+<pre><code class="language-groovy">
 when:
 stack.pop()
 
 then:
 def e = thrown(EmptyStackException)
 e.cause == null
-```
+</code></pre>
 
 或者，你可以使用稍微变化的语法：
 
-```groovy
+<pre><code class="language-groovy">
 when:
 stack.pop()
 
 then:
 EmptyStackException e = thrown()
 e.cause == null
-```
+</code></pre>
 
 这种语法有两个小优点：首先，异常变量是强类型的，使得IDE能够更容易地提供代码补全。其次，条件读起来更像一个句子（"then an EmptyStackException is thrown"）。请注意，如果`thrown()`方法没有传递异常类型，则会从左侧的变量类型推断异常类型。
 
 有时我们需要表达不应该抛出异常的情况。例如，让我们尝试表达`HashMap`应该接受`null`键：
 
-```groovy
+<pre><code class="language-groovy">
 def "HashMap accepts null key"() {
   setup:
   def map = new HashMap()
   map.put(null, "elem")
 }
-```
+</code></pre>
 
 这段代码可以工作，但不显示代码的意图。是不是有人在实现这个方法之前就离开了？毕竟，条件在哪里？幸运的是，我们可以做得更好：
 
-```groovy
+<pre><code class="language-groovy">
 def "HashMap accepts null key"() {
   given:
   def map = new HashMap()
@@ -249,7 +249,7 @@ def "HashMap accepts null key"() {
   then:
   notThrown(NullPointerException)
 }
-```
+</code></pre>
 
 通过使用`notThrown()`，我们明确指出特别不应该抛出`NullPointerException`异常。（根据`Map.put()`的约定，对于不支持`null`键的映射，这是正确的做法。）然而，如果抛出任何其他异常，该方法也会失败。
 
@@ -257,9 +257,9 @@ def "HashMap accepts null key"() {
 
 #### 交互
 
-与条件描述对象的状态不同，交互描述对象之间如何进行通信。关于交互和基于交互的测试将在单独的[章节](/docs/interaction_based_testing.html#interaction-based-testing)中介绍，因此我们在这里只给出一个快速的示例。假设我们想要描述从发布者到订阅者的事件流程。下面是代码示例：
+与条件描述对象的状态不同，交互描述对象之间如何进行通信。关于交互和基于交互的测试将在单独的[章节](/docs/interaction_based_testing#interaction-based-testing)中介绍，因此我们在这里只给出一个快速的示例。假设我们想要描述从发布者到订阅者的事件流程。下面是代码示例：
 
-```groovy
+<pre><code class="language-groovy">
 def "events are published to all subscribers"() {
   given:
   def subscriber1 = Mock(Subscriber)
@@ -275,7 +275,7 @@ def "events are published to all subscribers"() {
   1 * subscriber1.receive("event")
   1 * subscriber2.receive("event")
 }
-```
+</code></pre>
 
 
 
@@ -283,7 +283,7 @@ def "events are published to all subscribers"() {
 
 一个`expect`块比一个`then`块更加受限，因为它只能包含条件和变量定义。它在某些情况下非常有用，例如在单个表达式中描述刺激和预期响应更加自然。具体来看，比较下面两种描述`Math.max()`方法的尝试：
 
-```groovy
+<pre><code class="language-groovy">
 when:
 def x = Math.max(1, 2)
 
@@ -292,7 +292,7 @@ x == 2
 
 expect:
 Math.max(1, 2) == 2
-```
+</code></pre>
 
 虽然这两个片段在语义上是等价的，但第二个片段显然更可取。对两者的指导原则是：使用`when-then`来描述具有副作用的方法，使用`expect`来描述纯粹功能性的方法。
 
@@ -302,7 +302,7 @@ Math.max(1, 2) == 2
 
 ### `cleanup`块
 
-```groovy
+<pre><code class="language-groovy">
 given:
 def file = new File("/some/path")
 file.createNewFile()
@@ -311,7 +311,7 @@ file.createNewFile()
 
 cleanup:
 file.delete()
-```
+</code></pre>
 
 
 
@@ -327,7 +327,7 @@ file.delete()
 
 `where`块总是出现在方法的最后，并且不能重复。它用于编写数据驱动的特性方法。为了让你了解如何做到这一点，请看下面的例子：
 
-```groovy
+<pre><code class="language-groovy">
 def "computing the maximum of two numbers"() {
   expect:
   Math.max(a, b) == c
@@ -337,13 +337,13 @@ def "computing the maximum of two numbers"() {
   b << [1, 9]
   c << [5, 9]
 }
-```
+</code></pre>
 
 这个`where`块实际上创建了特性方法的两个“版本”：一个版本中a为5，b为1，c为5，另一个版本中a为3，b为9，c为9。
 
 尽管`where`块在声明时出现在最后，但它会在包含它的特性方法运行之前执行。
 
-`where`块在“[数据驱动测试](/docs/data_driven_testing.html#data-driven-testing)”章节中进一步解释。
+`where`块在“[数据驱动测试](/docs/data_driven_testing#data-driven-testing)”章节中进一步解释。
 
 
 
@@ -351,7 +351,7 @@ def "computing the maximum of two numbers"() {
 
 有时特性方法会变得很大，或者包含大量重复的代码。在这种情况下，就适合引入一个或多个辅助方法了。作为辅助方法的候选方法，则是设置/清理逻辑和复杂的条件。对于辅助方法，将其提取出来非常简单，所以让我们来看看条件：
 
-```groovy
+<pre><code class="language-groovy">
 def "offered PC matches preferred configuration"() {
   when:
   def pc = shop.buyPc()
@@ -362,11 +362,11 @@ def "offered PC matches preferred configuration"() {
   pc.ram >= 4096
   pc.os == "Linux"
 }
-```
+</code></pre>
 
 如果你碰巧是一个电脑极客，你的首选电脑配置可能非常详细，或者你可能想要比较多个商店的报价。因此，让我们将条件提取出来：
 
-```groovy
+<pre><code class="language-groovy">
 def "offered PC matches preferred configuration"() {
   when:
   def pc = shop.buyPc()
@@ -381,41 +381,41 @@ def matchesPreferredConfiguration(pc) {
   && pc.ram >= 4096
   && pc.os == "Linux"
 }
-```
+</code></pre>
 
 新的辅助方法`matchesPreferredConfiguration()`由一个返回布尔表达式的单语句组成（Groovy中`return`关键字是可选的）。然而，呈现出来的信息不够精准：
 
-```groovy
+<pre><code class="language-groovy">
 Condition not satisfied:
 
 matchesPreferredConfiguration(pc)
 |                             |
 false                         ...
-```
+</code></pre>
 
 这样做用处不大。幸运的是，我们可以做得更好：
 
-```groovy
+<pre><code class="language-groovy">
 void matchesPreferredConfiguration(pc) {
   assert pc.vendor == "Sunny"
   assert pc.clockRate >= 2333
   assert pc.ram >= 4096
   assert pc.os == "Linux"
 }
-```
+</code></pre>
 
 当将条件提取到辅助方法中时，需要考虑两个问题：首先，需要使用`assert`关键字将隐式条件转换为显式条件。其次，辅助方法必须具有`void`返回类型。否则，Spock可能会将返回值解释为失败的条件，这并不是我们想要的结果。
 
 诚如所愿，改进后的辅助方法明确地告诉我们具体出了什么问题：
 
-```groovy
+<pre><code class="language-groovy">
 Condition not satisfied:
 
 assert pc.clockRate >= 2333
        |  |         |
        |  1666      false
        ...
-```
+</code></pre>
 
 
 最后的建议是：尽管代码重用通常是件好事，但也不要过度使用。请注意，使用夹具方法或者辅助方法会增加特性方法之间的耦合。如果重用太多或错误的代码，你得到的将是脆弱且难以迭代的规范。
@@ -426,7 +426,7 @@ assert pc.clockRate >= 2333
 
 替换辅助方法的另一种选择是使用`with(target, closure)`方法和被验证的对象进行交互。这在`then`和`expect`块中特别有用。
 
-```groovy
+<pre><code class="language-groovy">
 def "offered PC matches preferred configuration"() {
   when:
   def pc = shop.buyPc()
@@ -439,13 +439,13 @@ def "offered PC matches preferred configuration"() {
     os == "Linux"
   }
 }
-```
+</code></pre>
 
 与使用辅助方法时不同，这里不需要显式的`assert`语句来进行错误报告。
 
 在验证模拟对象时，`with`语句也可以简化冗长的验证语句。
 
-```groovy
+<pre><code class="language-groovy">
 def service = Mock(Service) // 具有 start()、stop() 和 doWork() 方法
 def app = new Application(service) // 控制 service 的生命周期
 
@@ -458,7 +458,7 @@ with(service) {
   1 * doWork()
   1 * stop()
 }
-```
+</code></pre>
 
 有时，IDE 可能无法确定目标的类型，这时可以通过使用`with(target, type, closure)`的形式手动指定目标类型予以解决。
 
@@ -470,7 +470,7 @@ with(service) {
 
 `verifyAll`方法可以像`with`一样使用，
 
-```groovy
+<pre><code class="language-groovy">
 def "offered PC matches preferred configuration"() {
   when:
   def pc = shop.buyPc()
@@ -483,17 +483,17 @@ def "offered PC matches preferred configuration"() {
     expect os == "Linux"
   }
 }
-```
+</code></pre>
 
 或者可以在没有目标的情况下使用。
 
-```groovy
+<pre><code class="language-groovy">
 expect:
 verifyAll {
   expect 2 == 2
   expect 4 == 4
 }
-```
+</code></pre>
 
 与`with`类似，你还可以选择为 IDE 提供类型提示。
 
@@ -505,14 +505,14 @@ verifyAll {
 
 编写精良的规范是有价值的信息源。尤其对于面向更广泛受众（如架构师、领域专家、客户等）的高级规范，除了规范和特性的名称，提供更多自然语言的信息也是有意义的。因此，Spock提供了一种在代码块中附加文本描述的方式：
 
-```groovy
+<pre><code class="language-groovy">
 given: "open a database connection"
 // code goes here
-```
+</code></pre>
 
 使用`and:`标签来描述逻辑上不同的代码块部分：
 
-```groovy
+<pre><code class="language-groovy">
 given: "open a database connection"
 // code goes here
 
@@ -521,13 +521,13 @@ and: "seed the customer table"
 
 and: "seed the product table"
 // code goes here
-```
+</code></pre>
 
 `and:`标签后面跟着一个描述，可以在特性方法的任何（顶层）位置插入，并不会改变方法的语义。
 
 在行为驱动开发模式下，使用`given-when-then`的格式来描述面向客户的特性（称为故事）。Spock使用`given:`标签直接支持这种规范风格：
 
-```groovy
+<pre><code class="language-groovy">
 given: "an empty bank account"
 // ...
 
@@ -536,7 +536,7 @@ when: "the account is credited \$10"
 
 then: "the account's balance is \$10"
 // ...
-```
+</code></pre>
 
 代码块描述不仅存在于源代码中，还可供Spock运行时使用。有计划地使用代码块描述的方式，不仅能增强诊断消息，也能提供给所有利益相关者更易理解的文本报告。
 
@@ -557,7 +557,7 @@ then: "the account's balance is \$10"
 
 
 
-请转到[扩展](/docs/extensions.html#extensions)章节，了解如何实现自己的指令和扩展。
+请转到[扩展](/docs/extensions#extensions)章节，了解如何实现自己的指令和扩展。
 
 
 

@@ -1,4 +1,10 @@
-.logo{width:100px;}
+header{width:100%;padding:10px 40px;clear:both}
+#logo-container{}
+#logo-container a{display:inline;margin-right:10px;}
+#logo-container .logo{width:100px;}
+#logo-docs{display:inline;padding:10px 0;font-size:50px;}
 main {position:relative}
-main .article-nav{width:200px;}
-main .article-container{position:absolute;left:210px;top:0px;}
+main .article-nav{width:200px;position:absolute;left:20px;top:0;}
+main .article-nav h2{margin-top:0}
+main .article-container{margin:10px 20px 20px 210px;}
+table{width:100%}
