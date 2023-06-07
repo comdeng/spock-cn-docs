@@ -760,6 +760,8 @@ then:
 
 
 
+<a name="OtherKindsOfMockObjects"></a>
+
 ## 其他类型的模拟对象
 
 到目前为止，我们使用`MockingApi.Mock`方法创建了模拟对象。除此方法之外，`MockingApi`类还提供了几个其他的工厂方法，用于创建更专门的模拟对象。
@@ -856,6 +858,8 @@ subscriber.receive(_) >> { String message -> callRealMethod(); message.size() > 
 
 
 
+<a name="PartialMocks"></a>
+
 ### 部分Mock
 
 （慎重使用此功能。更改规范代码的设计可能会更好。）
@@ -879,13 +883,22 @@ then:
 
 
 
-## Groovy Mocks（Groovy模拟）
+<a name="GroovyMocks"></a>
+
+## Groovy模拟（Groovy Mocks）
 
 到目前为止，我们看到的所有模拟功能都不管调用代码是用Java还是Groovy编写的都是一样的。通过利用Groovy的动态能力，Groovy模拟提供了一些专门用于测试Groovy代码的额外功能。它们使用`MockingApi.GroovyMock()`、`MockingApi.GroovyStub()`和`MockingApi.GroovySpy()`工厂方法来创建。
 
 > 何时应该使用Groovy模拟而不是普通模拟？在代码规范中使用Groovy编写，并且需要一些独特的Groovy模拟功能时，应该使用Groovy模拟。当从Java代码调用时，Groovy模拟将表现得像普通模拟一样。请注意，仅仅因为规范的代码和/或模拟的类型是用Groovy编写的，并不意味着必须使用Groovy模拟。除非你有具体的理由使用Groovy模拟，否则请使用普通模拟。
 
+
+
+
+
+<a name="_mocking_dynamic_methods"></a>
+
 ### 模拟动态方法
+
 所有的Groovy模拟对象都实现了`GroovyObject`接口。它们支持对动态方法进行模拟和存根操作，就好像它们是实际声明的方法一样：
 
 <pre><code class="language-groovy">
@@ -895,6 +908,8 @@ Subscriber subscriber = GroovyMock()
 </code></pre>
 
 
+
+<a name="MockingAllInstancesOfAType"></a>
 
 ### 模拟类型的所有实例
 
@@ -926,6 +941,8 @@ then:
 
 
 
+<a name="MockingConstructors"></a>
+
 ### 模拟构造函数
 
 （在使用此功能之前要三思。更改规范代码的设计可能会更好。）
@@ -948,6 +965,8 @@ new RealSubscriber("Fred") >> new RealSubscriber("Barney")
 
 
 
+<a name="_mocking_static_methods"></a>
+
 ### 模拟静态方法
 
 （在使用此功能之前要三思。更改规范代码的设计可能会更好。）
@@ -969,11 +988,15 @@ GroovySpy(RealSubscriber, global: true)
 </code></pre>
 
 
+<a name="_advanced_features"></a>
+
 ## 高级特性
 
 大多数情况下，你不应该需要这些特性。但如果你需要，你会很高兴拥有它们。
 
 
+
+<a name="ALaCarteMocks"></a>
 
 ### 可选模拟对象
 
@@ -986,6 +1009,8 @@ def person = Mock(name: "Fred", type: Person, defaultResponse: ZeroOrNullRespons
 在这里，我们创建了一个模拟对象，其默认返回值与`Mock()`的返回值匹配，但其调用不被验证（类似于`Stub()`）。我们可以通过传递`ZeroOrNullResponse`的自定义`org.spockframework.mock.IDefaultResponse`来响应意外的方法调用。
 
 
+
+<a name="DetectingMockObjects"></a>
 
 ### 检测模拟对象
 
@@ -1013,6 +1038,8 @@ mock.nature == MockNature.MOCK
 </code></pre>
 
 
+
+<a name="_further_reading"></a>
 
 ## 深度阅读
 
