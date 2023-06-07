@@ -41,6 +41,8 @@ Java世界上有许多受欢迎和成熟的模拟框架：[JMock](https://www.jm
 
 
 
+<a name="_creating_mock_objects"></a>
+
 ## 创建模拟对象
 
 模拟对象是通过`MockingApi.Mock()`方法创建的。我们先来创建两个模拟的Subscriber。
@@ -65,6 +67,8 @@ Mock对象实际上实现（或者在类的情况下扩展）了它所代表的�
 
 
 
+<a name="_default_behavior_of_mock_objects"></a>
+
 ## 模拟对象的默认行为
 
 
@@ -78,6 +82,8 @@ Mock对象实际上实现（或者在类的情况下扩展）了它所代表的�
 初始状态下，模拟对象没有任何行为。它们的方法都可以被调用，除了把方法的返回类型的默认值（`false`、`0`或`null`）返回之外，没有其他影响。比较特殊的是`Object.equals`、`Object.hashCode`和`Object.toString`方法，它们具有以下默认行为：模拟对象只等于它自己，具有唯一的哈希码，并且包含所表示类型名称的字符串表示形式。这种默认行为可以通过对方法进行存根来实现覆盖，我们将在[存根](/docs/interaction_based_testing#_stubbing)部分学习。
 
 
+
+<a name="_injecting_mock_objects_into_code_under_specification"></a>
 
 ## 将模拟对象注入到被测试代码中
 
@@ -99,6 +105,8 @@ class PublisherSpec extends Specification {
 
 
 
+
+<a name="_mocking"></a>
 
 ## 模拟（Mocking）
 
@@ -122,6 +130,8 @@ def "should send messages to all subscribers"() {
 
 
 
+<a name="_interactions_2"></a>
+
 ### 交互
 
 > #### 一个交互只是一个普通的方法调用吗？
@@ -142,6 +152,8 @@ def "should send messages to all subscribers"() {
 </code></pre>
 
 
+<a name="_cardinality"></a>
+
 ### 基数
 
 交互的基数描述了方法调用的期望次数。它可以是一个固定的数字或一个范围：
@@ -156,12 +168,19 @@ _ * subscriber.receive("hello")        // 任何次数的调用，包含0次
                                                 // (很少需要；请参阅“Strict Mocking”。)
 </code></pre>
 
+
+<a name="_target_constraint"></a>
+
 ### 目标约束
+
 目标约束描述了预期接收方法调用的模拟对象是哪个：
 <pre><code class="language-groovy">
 1 * subscriber.receive("hello")  // 对'subscriber'的1次调用
 1 * _.receive("hello")                   // 对任意模拟对象的1次调用
 </code></pre>
+
+
+<a name="_method_constraint"></a>
 
 ### 方法约束
 
@@ -184,6 +203,11 @@ _ * subscriber.receive("hello")        // 任何次数的调用，包含0次
 <pre><code class="language-groovy">
 1 * subscriber.setStatus("ok")  // 不能这样写： 1 * subscriber.status = "ok"
 </code></pre>
+
+
+
+
+<a name="_argument_constraints"></a>
 
 ### 参数约束
 
@@ -229,7 +253,9 @@ subscriber.receive("hello", "goodbye")
 > Groovy允许以可变参数方式调用最后一个参数为数组类型的方法。因此，可变参数语法也可以在匹配这类方法的交互中使用。
 
 
-### 等于约束
+
+#### 等于约束
+
 使用Groovy的等于运算符来检查参数，即`argument == constraint`。你可以使用以下方式作为等于约束：
 
 - 任何字面值：`1 * check('string')`、`1 * check(1)`、`1 * check(null)`，
@@ -240,13 +266,13 @@ subscriber.receive("hello", "goodbye")
 
 
 
-### Hamcrest约束：
+#### Hamcrest约束：
 如果约束对象是Hamcrest匹配器（matcher），则将使用该匹配器来检查参数。
 
-### 通配符约束
+#### 通配符约束
 通配符约束将匹配任何参数，无论是`null`还是其他。它的表示形式是`1 * subscriber.receive()`。还有一个扩展通配符约束`*_`，`1 * subscriber.receive(*_)`匹配任意数量的参数，包括零个。
 
-### 代码约束
+#### 代码约束
 代码约束是最灵活的约束之一。它是一个Groovy闭包，以参数的形式接收参数。该闭包被视为条件块，因此它的行为类似于`then`块，即每行都被视为隐式断言。它可以模拟除了扩展通配符约束之外的所有约束，但建议在可能的情况下使用更简单的约束。你可以进行多个断言，调用方法进行断言，或使用`with`/`verifyAll`方法。
 
 <pre><code class="language-groovy">
@@ -259,14 +285,15 @@ subscriber.receive("hello", "goodbye")
 })
 </code></pre>
 
-### 否定约束
+#### 否定约束
 否定约束符号"!"是一个复合约束，即它需要与另一个约束组合使用才能起作用。它对嵌套约束的结果取反，例如`1 * subscriber.receive(!null)`是检查null的等式约束与否定约束组合的结果，将其转换为非null。
 
 虽然它可以与任何其他约束结合使用，但并不总是有意义的，例如`1 * subscriber.receive(!_)`将不匹配任何内容。还要记住，对于不匹配的否定约束，诊断信息只会显示内部约束的匹配结果，没有其他信息。
 
-### 类型约束
+#### 类型约束
 类型约束用于检查参数的类型/类，与否定约束一样，它也是一个复合约束。通常将其表示为`_ as Type`，它是通配符约束和类型约束的组合。你也可以将其与其他约束结合使用，例如`1 * subscriber.receive({ it.contains('foo')} as String)`将在执行代码约束之前断言它是一个String，并检查其是否包含"foo"。
 
+<a name="_matching_any_method_call"></a>
 ### 匹配任意方法调用
 有时候匹配"任何"方法调用可能是有用的，根据特定情况：
 
@@ -279,6 +306,10 @@ subscriber.receive("hello", "goodbye")
 </code></pre>
 
 > 尽管`(_.._) * _._(*_) >> _` 是有效的交互声明，但它既不是良好的风格，也没有特别的用途。
+
+
+
+<a name="_strict_mocking"></a>
 
 ## 严格模拟
 
@@ -344,6 +375,8 @@ class MySpec extends Specification {
 </code></pre>
 
 
+<a name="_grouping_interactions_with_same_target"></a>
+
 ## 将具有相同目标的交互进行分组
 
 具有相同目标的交互可以在 `Specification.with` 块中分组。与[在模拟对象创建时声明交互类似](/docs/interaction_based_testing#declaring-interactions-at-creation-time)，这样就不需要重复目标约束了：
@@ -358,6 +391,8 @@ with(subscriber) {
 一个 with 块也可以用于将具有相同目标的条件分组。
 
 
+
+<a name="_mixing_interactions_and_conditions"></a>
 
 ## 混合交互和条件
 
@@ -374,6 +409,8 @@ publisher.messageCount == 1
 请朗读："当发布者发送一条'hello'消息时，订阅者应该只收到一次消息，而发布者的消息计数应为1。"
 
 
+
+<a name="_explicit_interaction_blocks"></a>
 
 ## 显式交互块
 
@@ -409,6 +446,8 @@ interaction {
 
 
 
+<a name="_scope_of_interactions"></a>
+
 ## 交互的作用域
 
 在 `then:` 块中声明的交互的作用域限定在前面的 `when:` 块中：
@@ -434,6 +473,8 @@ then:
 交互始终限定在特定的特性方法中。因此，它们不能在静态方法、`setupSpec`方法或`cleanupSpec` 方法中声明。同样，模拟对象不应存储在静态或 `@Shared` 字段中。
 
 
+
+<a name="_verification_of_interactions"></a>
 
 ## 交互验证
 
@@ -477,6 +518,8 @@ Unmatched invocations (ordered by similarity):
 
 
 
+<a name="_invocation_order_2"></a>
+
 ### 调用顺序
 
 通常情况下，确切的方法调用顺序并不重要，而且可能随时间而变化。为了避免过度规定，Spock默认允许任何调用顺序，只要满足指定的交互即可：
@@ -504,6 +547,8 @@ then:
 > 使用`and:`拆分`then:`块不会强制任何顺序，因为`and:`仅用于文档目的，不具有任何语义。
 
 
+
+<a name="_mocking_classes"></a>
 
 ## 模拟类
 
@@ -556,7 +601,12 @@ subscriber.receive(_) >> "ok"
 
 存根交互可以在通常的位置声明：要么在`then:`块内，要么在`when:`块之前。（查看[交互声明的位置](/docs/interaction_based_testing#_where_to_declare_interactions)了解更多细节。）如果模拟对象仅用于存根，通常会在[创建模拟时](/docs/interaction_based_testing#declaring-interactions-at-creation-time)或在`given:`块中声明交互。
 
+
+
+<a name="_returning_fixed_values"></a>
+
 ### 返回固定值
+
 我们已经看到了使用右移（`>>`）运算符返回固定值的用法：
 
 <pre><code class="language-groovy">
@@ -574,6 +624,8 @@ subscriber.receive("message2") >> "fail"
 
 
 
+<a name="_returning_sequences_of_values"></a>
+
 ### 返回值序列
 
 要在连续的调用中返回不同的值，请使用三重右移（`>>>`）运算符：
@@ -584,7 +636,12 @@ subscriber.receive(_) >>> ["ok", "error", "error", "ok"]
 
 这将在第一次调用时返回"ok"，在第二次和第三次调用时返回"error"，并在所有剩余的调用中返回"ok"。右侧必须是Groovy知道如何迭代的值；在此示例中，我们使用了一个普通列表。
 
+
+
+<a name="_computing_return_values"></a>
+
 ### 计算返回值
+
 要根据方法的参数计算返回值，请使用右移（>>）运算符与闭包结合使用。如果闭包声明了一个未经类型声明的参数，它将被传递方法的参数列表：
 
 <pre><code class="language-groovy">
@@ -605,6 +662,8 @@ subscriber.receive(_) >> { String message -> message.size() > 3 ? "ok" : "fail" 
 
 
 
+<a name="_performing_side_effects"></a>
+
 ### 执行副作用
 
 有时，你可能希望执行更多操作而不仅仅计算返回值。一个典型的例子是抛出异常。同样，闭包可以解决这个问题：
@@ -617,6 +676,8 @@ subscriber.receive(_) >> { throw new InternalError("ouch") }
 
 
 
+<a name="_chaining_method_responses"></a>
+
 ### 链接方法响应
 
 方法响应可以链接起来：
@@ -628,6 +689,8 @@ subscriber.receive(_) >>> ["ok", "fail", "ok"] >> { throw new InternalError() } 
 这将为前三个调用返回"ok"、"fail"、"ok"，对于第四个调用抛出InternalError，并对任何进一步的调用返回ok。
 
 
+
+<a name="_returning_a_default_response"></a>
 
 ### 返回默认响应
 
@@ -666,6 +729,8 @@ thing.id == 'id-1337'
 `_ >> _`指示模拟对象对所有交互返回默认响应。然而，在`then`块中定义的交互将优先于`given`块中定义的交互，这样我们就可以覆盖和断言我们真正关心的交互。
 
 
+
+<a name="_combining_mocking_and_stubbing"></a>
 
 ## 组合模拟和存根
 
