@@ -1,3 +1,9 @@
+---
+title: "基于交互的测试"
+---
+
+
+
 # 基于交互的测试
 
 交互式测试是一种设计和测试技术，于2000年代早期在极限编程（Extreme Programming，XP）社区中出现。它专注于对象的行为而非状态，通过方法调用来探索对象（们）如何与其协作者进行交互。
@@ -33,6 +39,8 @@ Java世界上有许多受欢迎和成熟的模拟框架：[JMock](https://www.jm
 
 除非另有说明，Spock模拟框架的所有功能都适用于测试Java和Groovy代码。
 
+
+
 ## 创建模拟对象
 
 模拟对象是通过`MockingApi.Mock()`方法创建的。我们先来创建两个模拟的Subscriber。
@@ -55,6 +63,8 @@ Subscriber subscriber2 = Mock()
 
 Mock对象实际上实现（或者在类的情况下扩展）了它所代表的类型。换句话说，在我们的例子中，`subscriber`是一个`Subscriber`。因此，它可以传递给需要这个类型的静态类型（Java）代码。
 
+
+
 ## 模拟对象的默认行为
 
 
@@ -66,6 +76,8 @@ Mock对象实际上实现（或者在类的情况下扩展）了它所代表的�
 
 
 初始状态下，模拟对象没有任何行为。它们的方法都可以被调用，除了把方法的返回类型的默认值（`false`、`0`或`null`）返回之外，没有其他影响。比较特殊的是`Object.equals`、`Object.hashCode`和`Object.toString`方法，它们具有以下默认行为：模拟对象只等于它自己，具有唯一的哈希码，并且包含所表示类型名称的字符串表示形式。这种默认行为可以通过对方法进行存根来实现覆盖，我们将在[存根](/docs/interaction_based_testing#_stubbing)部分学习。
+
+
 
 ## 将模拟对象注入到被测试代码中
 
@@ -84,6 +96,10 @@ class PublisherSpec extends Specification {
 
 现在我们可以描述两方之间预期的交互。
 
+
+
+
+
 ## 模拟（Mocking）
 
 模拟是描述被测试对象与其协作者之间（强制性的）交互的行为。下面是一个例子：
@@ -101,6 +117,10 @@ def "should send messages to all subscribers"() {
 大声读出："当发布者发送一条 'hello' 消息时，两个订阅者都应该准确地接收到该消息一次。"
 
 当运行此特性方法时，执行`when:`块期间对模拟对象的所有调用将与`then:`块中描述的交互进行匹配。如果其中一个交互未满足，将抛出一个（子类）`InteractionNotSatisfiedError`异常。此验证自动进行，无需额外的代码。
+
+
+
+
 
 ### 交互
 
@@ -121,7 +141,9 @@ def "should send messages to all subscribers"() {
 基数
 </code></pre>
 
+
 ### 基数
+
 交互的基数描述了方法调用的期望次数。它可以是一个固定的数字或一个范围：
 
 <pre><code class="language-groovy">
@@ -277,8 +299,13 @@ _ * auditing._                                  // 允许与 'auditing' 进行�
 
 > `_ *` 只在严格模拟的上下文中有意义。特别是在 [存根](/docs/interaction_based_testing#_stubbing)调用时，它完全没有存在的必要。例如，`_ * auditing.record() >> "ok"` 可以（而且应该！）简化为 `auditing.record() >> "ok"`。
 
-## 交互声明的位置
+
+
 <a name="_where_to_declare_interactions"></a>
+
+## 交互声明的位置
+
+
 到目前为止，我们在 `then:` 块中声明了所有的交互。这通常会使规范读起来更自然。然而，在 `when:` 块之前的任何地方声明交互也是允许的。特别是，这意味着可以在 `setup` 方法中声明交互。交互还可以在同一个规范类的任何 "辅助" 实例方法中声明。
 
 当发生对模拟对象的调用时，它会按照声明的交互顺序进行匹配。如果一个调用匹配多个交互，那么尚未达到其上限调用次数的最早声明的交互将获胜。有一个例外：在`then:` 块中声明的交互会在任何其他交互之前进行匹配。这允许使用 `then:` 块中声明的交互来覆盖在 `setup` 方法中声明的交互，或者在其他场景下进行覆盖。
@@ -286,8 +313,13 @@ _ * auditing._                                  // 允许与 'auditing' 进行�
 > #### Spock深入探讨：如何识别交互？
 > 换句话说，是什么使一个表达式成为一个交互声明，而不是一个常规方法调用？Spock使用一个简单的语法规则来识别交互：如果一个表达式处于语句位置，并且是乘法 (*) 或右移 (>>, >>>) 操作之一，那么它被视为一个交互并相应地解析。这样的表达式在语句位置上几乎没有或根本没有价值，所以改变其含义是可以的。请注意，这些操作符对应于在模拟时声明基数 （当模拟时） 或响应生成器（当存根时）的语法。其中之一必须始终存在；单独的 `foo.bar()` 永远不会被视为交互声明。
 
-## 在创建模拟对象时声明交互
+
+
 <a name="declaring-interactions-at-creation-time"></a>
+
+## 在创建模拟对象时声明交互
+
+
 
 如果一个模拟对象具有一组固定的 "基本" 交互，可以在创建模拟对象的同时声明它们：
 
@@ -311,6 +343,7 @@ class MySpec extends Specification {
 }
 </code></pre>
 
+
 ## 将具有相同目标的交互进行分组
 
 具有相同目标的交互可以在 `Specification.with` 块中分组。与[在模拟对象创建时声明交互类似](/docs/interaction_based_testing#declaring-interactions-at-creation-time)，这样就不需要重复目标约束了：
@@ -324,7 +357,10 @@ with(subscriber) {
 
 一个 with 块也可以用于将具有相同目标的条件分组。
 
+
+
 ## 混合交互和条件
+
 一个`then:`块可以包含交互和条件。虽然不是强制要求，但习惯上在条件之前声明交互：
 <pre><code class="language-groovy">
 when:
@@ -337,7 +373,10 @@ publisher.messageCount == 1
 
 请朗读："当发布者发送一条'hello'消息时，订阅者应该只收到一次消息，而发布者的消息计数应为1。"
 
+
+
 ## 显式交互块
+
 在内部，Spock在交互发生之前必须获得有关预期交互的完整信息。那么，在`then:`块中如何声明交互呢？答案是，Spock在幕后将在`then:`块中声明的交互移动到紧接在前面的`when:`块之前。在大多数情况下，这样做没有问题，但有时可能会导致问题：
 
 <pre><code class="language-groovy">
@@ -368,7 +407,10 @@ interaction {
 
 由于`MockingApi.interaction`块始终完整地移动，现在代码按预期运行。
 
+
+
 ## 交互的作用域
+
 在 `then:` 块中声明的交互的作用域限定在前面的 `when:` 块中：
 
 <pre><code class="language-groovy">
@@ -390,6 +432,8 @@ then:
 在 `then:` 块之外声明的交互从声明开始一直有效，直到包含的特性方法结束。
 
 交互始终限定在特定的特性方法中。因此，它们不能在静态方法、`setupSpec`方法或`cleanupSpec` 方法中声明。同样，模拟对象不应存储在静态或 `@Shared` 字段中。
+
+
 
 ## 交互验证
 
@@ -431,6 +475,8 @@ Unmatched invocations (ordered by similarity):
 1 * subscriber2.receive("hello")
 </code></pre>
 
+
+
 ### 调用顺序
 
 通常情况下，确切的方法调用顺序并不重要，而且可能随时间而变化。为了避免过度规定，Spock默认允许任何调用顺序，只要满足指定的交互即可：
@@ -458,7 +504,9 @@ then:
 > 使用`and:`拆分`then:`块不会强制任何顺序，因为`and:`仅用于文档目的，不具有任何语义。
 
 
+
 ## 模拟类
+
 除了接口之外，Spock还支持对类进行模拟。模拟类的工作方式与模拟接口类似；唯一的额外要求是将`byte-buddy` 1.9+或`cglib-nodep` 3.2.0+放置在类路径上。
 
 当使用以下情况时：
@@ -470,8 +518,13 @@ then:
 
 如果在类路径上缺少这些库中的任何一个，Spock会友好地通知你。
 
-## 存根
+
+
 <a name="_stubbing"></a>
+
+## 存根
+
+
 存根是使协作对象以某种方式响应方法调用的行为。在存根方法时，你不关心方法是否以及被调用多少次；你只希望在每次调用时返回某个值或执行某些副作用。
 
 为了说明以下示例，请修改`Subscriber`的`receive`方法以返回指示订阅者是否能够处理消息的状态码：
@@ -519,7 +572,10 @@ subscriber.receive("message2") >> "fail"
 
 这将在接收到"message1"时返回"ok"，在接收到"message2"时返回"fail"。可以返回的值没有限制，只要它们与方法声明的返回类型兼容即可。
 
+
+
 ### 返回值序列
+
 要在连续的调用中返回不同的值，请使用三重右移（`>>>`）运算符：
 
 <pre><code class="language-groovy">
@@ -547,7 +603,10 @@ subscriber.receive(_) >> { String message -> message.size() > 3 ? "ok" : "fail" 
 
 如果你需要有关方法调用的更多信息而不仅仅是其参数，请查看`org.spockframework.mock.IMockInvocation`。在闭包中，此接口中声明的所有方法都可用，无需前缀。 （在Groovy术语中，闭包委托给`IMockInvocation`的实例。）
 
+
+
 ### 执行副作用
+
 有时，你可能希望执行更多操作而不仅仅计算返回值。一个典型的例子是抛出异常。同样，闭包可以解决这个问题：
 
 <pre><code class="language-groovy">
@@ -556,7 +615,10 @@ subscriber.receive(_) >> { throw new InternalError("ouch") }
 
 当每次传入的调用与交互匹配时，闭包中的代码会执行。
 
+
+
 ### 链接方法响应
+
 方法响应可以链接起来：
 
 <pre><code class="language-groovy">
@@ -565,7 +627,10 @@ subscriber.receive(_) >>> ["ok", "fail", "ok"] >> { throw new InternalError() } 
 
 这将为前三个调用返回"ok"、"fail"、"ok"，对于第四个调用抛出InternalError，并对任何进一步的调用返回ok。
 
+
+
 ### 返回默认响应
+
 如果你不关心返回什么，但必须返回非空值，可以使用`_`。它将使用与存根（参见[存根](/docs/interaction_based_testing#Stubs)）相同的逻辑计算响应，因此它支队 `Mock` 和 `Spy` 实例有用。
 
 <pre><code class="language-groovy">
@@ -601,7 +666,9 @@ thing.id == 'id-1337'
 `_ >> _`指示模拟对象对所有交互返回默认响应。然而，在`then`块中定义的交互将优先于`given`块中定义的交互，这样我们就可以覆盖和断言我们真正关心的交互。
 
 
+
 ## 组合模拟和存根
+
 模拟和存根是密切相关的：
 
 <pre><code class="language-groovy">
@@ -626,11 +693,18 @@ then:
 
 > 模拟和存根的同一方法调用必须在同一个交互中进行。
 
+
+
 ## 其他类型的模拟对象
+
 到目前为止，我们使用`MockingApi.Mock`方法创建了模拟对象。除此方法之外，`MockingApi`类还提供了几个其他的工厂方法，用于创建更专门的模拟对象。
 
-### 存根
+
+
 <a name="Stubs"></a>
+
+### 存根
+
 可以使用`MockingApi.Stub`工厂方法创建存根：
 
 <pre><code class="language-groovy">
@@ -659,8 +733,12 @@ Subscriber subscriber = Stub {
 }
 </code></pre>
 
-### 间谍（Spies）
+
 <a href="Spies"></a>
+
+### 间谍（Spies）
+
+
 
 （慎重使用此功能。更改规范代码的设计可能会更好。）
 
@@ -711,7 +789,10 @@ subscriber.receive(_) >> { String message -> callRealMethod(); message.size() > 
 
 对象，必须有一个默认方法；对于类模拟对象，必须有一个（非抽象的）原始方法。
 
+
+
 ### 部分Mock
+
 （慎重使用此功能。更改规范代码的设计可能会更好。）
 
 Spy也可以用作部分Mock：
@@ -731,6 +812,8 @@ then:
 1 * persister.persist("msg")
 </code></pre>
 
+
+
 ## Groovy Mocks（Groovy模拟）
 
 到目前为止，我们看到的所有模拟功能都不管调用代码是用Java还是Groovy编写的都是一样的。通过利用Groovy的动态能力，Groovy模拟提供了一些专门用于测试Groovy代码的额外功能。它们使用`MockingApi.GroovyMock()`、`MockingApi.GroovyStub()`和`MockingApi.GroovySpy()`工厂方法来创建。
@@ -746,7 +829,10 @@ Subscriber subscriber = GroovyMock()
 1 * subscriber.someDynamicMethod("hello")
 </code></pre>
 
+
+
 ### 模拟类型的所有实例
+
 （在使用此功能之前要三思。更改规范代码的设计可能会更好。）
 
 通常，Groovy模拟对象需要像普通模拟对象一样被注入到规范代码中。然而，当一个Groovy模拟对象被创建为全局对象时，它会在整个feature方法的执行期间自动替换掉被模拟类型的所有真实实例：
@@ -773,7 +859,10 @@ then:
 > #### 全局Groovy模拟对象是如何实现的？
 全局Groovy模拟对象通过Groovy元编程获得其超能力。更准确地说，每个全局模拟类型在特性方法的执行期间被分配了一个自定义元类。由于全局Groovy模拟对象仍然基于CGLIB代理，因此在从Java代码中调用时，它将保留其一般的模拟功能（但不包括超能力）。
 
+
+
 ### 模拟构造函数
+
 （在使用此功能之前要三思。更改规范代码的设计可能会更好。）
 
 全局模拟对象支持模拟构造函数：
@@ -792,7 +881,10 @@ new RealSubscriber("Fred") >> new RealSubscriber("Barney")
 
 现在，无论何时有代码尝试构造一个名为Fred的订阅者，我们将构造一个名为Barney的订阅者。
 
+
+
 ### 模拟静态方法
+
 （在使用此功能之前要三思。更改规范代码的设计可能会更好。）
 
 全局模拟对象支持模拟和存根静态方法：
@@ -811,11 +903,15 @@ RealSubscriber anySubscriber = GroovySpy(global: true)
 GroovySpy(RealSubscriber, global: true)
 </code></pre>
 
+
 ## 高级特性
 
 大多数情况下，你不应该需要这些特性。但如果你需要，你会很高兴拥有它们。
 
+
+
 ### 可选模拟对象
+
 归根结底，`Mock()`、`Stub()`和`Spy()`工厂方法只是一种创建具有特定配置的模拟对象的预设方式。如果你希望更精细地控制模拟对象的配置，可以查看`org.spockframework.mock.IMockConfiguration`接口。该接口的所有属性都可以作为命名参数传递给`Mock()`方法。例如：
 
 <pre><code class="language-groovy">
@@ -824,7 +920,10 @@ def person = Mock(name: "Fred", type: Person, defaultResponse: ZeroOrNullRespons
 
 在这里，我们创建了一个模拟对象，其默认返回值与`Mock()`的返回值匹配，但其调用不被验证（类似于`Stub()`）。我们可以通过传递`ZeroOrNullResponse`的自定义`org.spockframework.mock.IDefaultResponse`来响应意外的方法调用。
 
+
+
 ### 检测模拟对象
+
 要确定特定对象是否为Spock模拟对象，可以使用`org.spockframework.mock.MockUtil`：
 
 <pre><code class="language-groovy">
@@ -847,6 +946,8 @@ mock.name == "list2"
 mock.type == List
 mock.nature == MockNature.MOCK
 </code></pre>
+
+
 
 ## 深度阅读
 

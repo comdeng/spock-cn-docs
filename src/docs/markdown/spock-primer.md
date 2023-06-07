@@ -1,3 +1,7 @@
+---
+title: "Spock指南"
+---
+
 # Spock指南
 
 本章内容假定你已经具有Groovy和单元测试的基本知识。如果你是Java开发人员，但没有听说过Groovy，请不要担心 —— Groovy会让您觉得非常熟悉！实际上，Groovy的主要设计目标之一是成为Java身边的脚本语言。因此，只需跟随教程，并在需要时查阅Groovy文档即可。
@@ -10,21 +14,27 @@
 
 
 
+<a name="terminology"></a>
+
 ## 术语定义
 我们首先来定义几个术语：Spock允许你编写[`规范`](https://en.wikipedia.org/wiki/Specification_by_example)，描述其预期的`特性`（`属性`、`方面`）。所关注的系统可以是从单个类到整个应用的任何内容，也被称为`待规范系统`（SUS）或系统。特性的描述始于对待规范系统及其协作者的特定快照；这个快照被称为特性的夹具。
 
 以下各节将引导你了解Spock规范可能由哪些构建块组成。典型的规范只使用它们的子集。
 
 
+
+<a name="imports"></a>
+
 ## 导入（Imports）
 
 <pre><code class="language-groovy">
 import spock.lang.*
 </code></pre>
-
 `spock.lang`包包含了编写测试规范需要用到的关键类型。
 
 
+
+<a name="_specification"></a>
 
 ## 规范（Specification）
 <pre><code class="language-groovy">
@@ -39,7 +49,12 @@ class MyFirstSpecification extends Specification {
 
 Specification类包含了一些有用的方法来编写规范。此外，它还指示JUnit使用`Sputnik`（Spock的JUnit运行器）来运行规范。通过`Sputnik`，Spock规范可以在大多数现代Java IDE和构建工具中运行。
 
+
+
+<a name="_fields"></a>
+
 ## 字段（Fields）
+
 <pre><code class="language-groovy">
 def obj = new ClassUnderSpecification()
 def coll = new Collaborator()
@@ -59,6 +74,11 @@ static final PI = 3.141592654
 
 静态字段应该仅用于定义常量。否则，使用共享字段是更好的办法，因为它们在共享方面的语义更加明确定义。
 
+
+
+
+
+<a name="_fixture_methods"></a>
 
 ## 夹具方法（Fixture Methods）
 
@@ -84,7 +104,11 @@ def cleanupSpec() {}  // 运行一次 -  在最后一个特性方法之后
 
 
 
-### 调用次序（Invocation Order）
+
+
+<a name="_invocation_order"></a>
+
+### 调用顺序（Invocation Order）
 
 
 
@@ -103,6 +127,8 @@ def cleanupSpec() {}  // 运行一次 -  在最后一个特性方法之后
 
 
 
+<a name="_feature_methods"></a>
+
 ## 特性方法（Feture Methods）
 
 特性方法是规范的核心。它们描述了你希望在待规范系统中找到的特性（属性、方面）。按照惯例，特性方法的命名使用字符串字面量。尽量为特性方法选择好的命名，并且可以自由使用任何字符！
@@ -116,7 +142,12 @@ def cleanupSpec() {}  // 运行一次 -  在最后一个特性方法之后
 
 第一个和最后一个阶段是可选的，而刺激和响应阶段总是存在的（除了在交互式特性方法中），并且可能会发生多次。
 
+
+
+<a name="_blocks"></a>
+
 ## 块（Blocks）
+
 Spock内置了对特性方法的每个概念阶段的支持。为此，特性方法被结构化为所谓的`块`（blocks）。块以标签开始，并延伸到下一个块的开始或方法的结束。有六种类型的块：`given`、`when`、`then`、`expect`、`cleanup`和`where`块。在方法的开始和第一个显式块之间的任何语句都属于隐式的`given`块。
 
 特性方法必须至少有一个显式（即带有标签）的块，实际上，显式块的存在使方法成为特性方法。块将方法划分为不同的部分，不能被嵌套使用。
@@ -347,6 +378,8 @@ def "computing the maximum of two numbers"() {
 
 
 
+<a name="_helper_methods"></a>
+
 ## 辅助方法（Helper Methods）
 
 有时特性方法会变得很大，或者包含大量重复的代码。在这种情况下，就适合引入一个或多个辅助方法了。作为辅助方法的候选方法，则是设置/清理逻辑和复杂的条件。对于辅助方法，将其提取出来非常简单，所以让我们来看看条件：
@@ -422,7 +455,9 @@ assert pc.clockRate >= 2333
 
 
 
-## 使用`with设置预期
+<a name="using-with-for-expectations"></a>
+
+## 使用`with`设置预期
 
 替换辅助方法的另一种选择是使用`with(target, closure)`方法和被验证的对象进行交互。这在`then`和`expect`块中特别有用。
 
@@ -464,6 +499,8 @@ with(service) {
 
 
 
+<a name="using-verifyall-to-assert-multiple-expectations-together"></a>
+
 ## 使用`verifyAll`同时断言多个预期
 
 通常情况下，预期在第一个失败的断言时会导致测试失败。有时候，在测试失败之前收集所有的失败信息以获取更多信息是很有帮助的，这种行为也被称为软断言。
@@ -499,9 +536,11 @@ verifyAll {
 
 
 
+<a name="specifications-as-documentation"></a>
+
 
 ## 规范即文档
-<a name="specifications_as_documentation"></a>
+
 
 编写精良的规范是有价值的信息源。尤其对于面向更广泛受众（如架构师、领域专家、客户等）的高级规范，除了规范和特性的名称，提供更多自然语言的信息也是有意义的。因此，Spock提供了一种在代码块中附加文本描述的方式：
 
@@ -542,6 +581,8 @@ then: "the account's balance is \$10"
 
 
 
+<a name="extensions"></a>
+
 ## 扩展
 
 正如我们所见，Spock为编写规范提供了许多功能。然而，总会有需要其他功能的时候。因此，Spock提供了一种基于拦截的扩展机制。扩展通过称为`指令`（directives）的注解来激活。目前，Spock附带以下指令：
@@ -560,6 +601,8 @@ then: "the account's balance is \$10"
 请转到[扩展](/docs/extensions#extensions)章节，了解如何实现自己的指令和扩展。
 
 
+
+<a name="comparison-to-junit"></a>
 
 ## 对比JUnit
 

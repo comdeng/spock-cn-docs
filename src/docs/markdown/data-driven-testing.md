@@ -1,6 +1,14 @@
+---
+title: "数据驱动测试"
+---
+
 # 数据驱动测试
 
 通常情况下，通过多次运行相同的测试代码，使用不同的输入和预期结果是很有用的。Spock的数据驱动测试支持使得这成为一项一流的特性。
+
+
+
+<a name="introduction-2"></a>
 
 ## 简介
 
@@ -50,6 +58,8 @@ class MathSpec extends Specification {
 我们已经完成了测试逻辑，但仍需要提供要使用的数据值。这是通过`where:`块来实现的，它始终位于方法的末尾。在最简单（也是最常见）的情况下，`where: `块包含一个数据表。
 
 
+
+<a name="data-tables"></a>
 
 ## 数据表（Data Tables）
 
@@ -124,11 +134,16 @@ b | c
 5 | 6
 </code></pre>
 
+
+<a name="isolated-execution-of-iterations"></a>
+
 ## 迭代的隔离执行
 
 每个迭代都在独立的执行环境中进行，就像是独立的特性方法一样。每个迭代都会获得自己的规范类实例，并在执行之前和之后分别调用设置（setup）和清理（cleanup）方法。这样确保了每个迭代的执行相互独立，不会相互影响。
 
 
+
+<a name="sharing-of-objects-between-iterations"></a>
 
 ## 迭代间的对象共享
 
@@ -139,6 +154,8 @@ b | c
 请注意，这样的对象也将与其他方法共享。目前没有很好的方法可以在同一方法的迭代之间共享对象。如果你认为这是一个问题，请考虑将每个方法放入单独的规范中，所有规范可以保存在同一个文件中。这样可以实现更好的隔离，代价则是一些模板代码。
 
 
+
+<a name="syntactic-variations"></a>
 
 ## 语法变化
 
@@ -207,6 +224,10 @@ class MathSpec extends Specification {
 }
 </code></pre>
 
+
+
+<a name="reporting-of-failures"></a>
+
 ## 失败的报告
 
 假设我们的`max`方法的实现存在一个缺陷，并且其中一个迭代失败了：
@@ -229,6 +250,8 @@ maximum of two numbers [a: 0, b: 0, c: 0, #2]   PASSED
 显而易见的问题是：哪个迭代失败了，它的数据值是什么？在我们的例子中，通过丰富的条件显示，很容易发现是第二个迭代（索引为1）失败了。在其他情况下，这可能更加困难甚至不可能。无论如何，Spock清楚地指出了哪个迭代失败，而不仅仅报告失败。特征方法的迭代默认采用丰富的命名模式进行展开。可以按照[展开的迭代名称](/docs/data_driven_testing#_unrolled_iteration_names)文档中所述进行配置，或者可以像下一节所述的那样禁用展开。
 
 
+
+<a name="method-uprolling-and-unrolling"></a>
 
 ## 方法的卷起（Uprolling）和展开（Unrolling）
 
@@ -292,6 +315,8 @@ unroll {
 
 
 
+<a name="data-pipes"></a>
+
 ## 数据管道
 
 数据表不是向数据变量提供值的唯一方式。事实上，数据表只是一个或多个数据管道的语法糖：
@@ -307,6 +332,8 @@ c << [3, 7, 0]
 使用左移操作符（<<）表示的数据管道将数据变量与数据提供者连接起来。数据提供者保存了变量的所有值，每个迭代一个值。任何Groovy可迭代对象都可以用作数据提供者。这包括`Collection`、`String`、`Iterable`类型的对象，以及实现`Iterable`接口的对象。数据提供者不一定是实际的数据（例如`Collection`的情况），它们可以从外部来源（如文本文件、数据库和电子表格）获取数据，或者随机生成数据。只有在需要时（在下一次迭代之前），才会向数据提供者查询下一个值。
 
 
+
+<a name="multi-variable-data-pipes"></a>
 
 ## 多变量数据管道
 
@@ -355,3 +382,446 @@ where:
   ]
 ].combinations()
 </code></pre>
+
+
+<a name="multi-data-pipe-named"></a>
+
+### 命名解构数据管道
+
+自Spock 2.2版本以来，多变量数据管道也可以从映射中进行解构。当数据提供程序返回带有命名键的映射时，这非常有用。或者，如果您有较长的值不适合使用数据表，那么使用映射使得阅读更加容易。
+
+
+
+```groovy
+...
+where:
+[a, b, c] << [
+  [
+    a: 1,
+    b: 3,
+    c: 5
+  ],
+  [
+    a: 2,
+    b: 4,
+    c: 6
+  ]
+]
+```
+
+你可以在嵌套的数据管道中使用命名解构，但只能在最内层的嵌套级别上进行。
+
+```gr
+...
+where:
+[a, [b, c]] << [
+  [1, [b: 3, c: 5]],
+  [2, [c: 6, b: 4]]
+]
+```
+
+
+
+
+
+<a name="data-variable-assignment"></a>
+
+## 数据变量赋值
+
+一个数据变量可以直接被赋值：
+
+```groovy
+...
+where:
+a = 3
+b = Math.random() * 100
+c = a > b ? a : b
+```
+
+赋值语句在每次迭代中重新计算。正如上面已经展示的，赋值语句的右侧可以引用其他数据变量：
+
+```groovy
+...
+where:
+row << sql.rows("select * from maxdata")
+// pick apart columns
+a = row.a
+b = row.b
+c = row.c
+```
+
+
+
+<a name="accessing-other-data-variables"></a>
+
+## 访问其他数据变量
+
+有两种可能性可以从另一个数据变量的计算中访问一个数据变量。
+
+第一种可能性是像上一节所示的派生数据变量。通过直接赋值定义的每个数据变量都可以访问先前定义的所有数据变量，包括通过数据表或数据管道定义的变量：
+
+```groovy
+...
+where:
+a = 3
+b = Math.random() * 100
+c = a > b ? a : b
+```
+
+
+
+第二种可能性是在数据表中访问先前的列：
+
+```groovy
+...
+where:
+a | b
+3 | a + 1
+7 | a + 2
+0 | a + 3
+```
+
+这也包括在同一`where`块中之前的数据表中的列：
+
+```groovy
+...
+where:
+a | b
+3 | a + 1
+7 | a + 2
+0 | a + 3
+
+and:
+c = 1
+
+and:
+d     | e
+a * 2 | b * 2
+a * 3 | b * 3
+a * 4 | b * 4
+```
+
+
+
+<a name="multi-variable-assignment"></a>
+
+## 多变量赋值
+
+与数据管道类似，如果你有一些 Groovy 可以迭代的对象，你也可以在一个表达式中对多个变量进行赋值。与数据管道不同，这里的语法与标准的 Groovy 多重赋值语法相同：
+
+
+
+```groovy
+@Shared sql = Sql.newInstance("jdbc:h2:mem:", "org.h2.Driver")
+
+def "maximum of two numbers multi-assignment"() {
+  expect:
+  Math.max(a, b) == c
+
+  where:
+  row << sql.rows("select a, b, c from maxdata")
+  (a, b, c) = row
+}
+```
+
+不感兴趣的数据值可以使用下划线（`_`）忽略掉：
+
+```groovy
+...
+where:
+row << sql.rows("select * from maxdata")
+(a, b, _, c) = row
+```
+
+
+
+<a name="combining-data-tables-data-pipes-and-variable-assignments"></a>
+
+## 组合使用数据表、数据管道和变量赋值
+
+数据表、数据管道和变量赋值可以根据需要进行组合使用：
+
+```groovy
+...
+where:
+a | b
+1 | a + 1
+7 | a + 2
+0 | a + 3
+
+c << [3, 4, 0]
+
+d = a > c ? a : c
+```
+
+
+
+<a name="type-coercion-for-data-variable-values"></a>
+
+## 数据变量值的类型强制转换
+
+数据变量值通过类型强制转换被转换为声明的参数类型。因此，可以通过扩展模块或使用规范的 `@Use` 扩展来提供自定义类型转换（如果应用于特性，则对 `where` 块没有影响）。
+
+
+
+```groovy
+def "type coercion for data variable values"(Integer i) {
+  expect:
+  i instanceof Integer
+  i == 10
+
+  where:
+  i = "10"
+}
+```
+
+
+
+```groovy
+@Use(CoerceBazToBar)
+class Foo extends Specification {
+  def foo(Bar bar) {
+    expect:
+    bar == Bar.FOO
+
+    where:
+    bar = Baz.FOO
+  }
+}
+enum Bar { FOO, BAR }
+enum Baz { FOO, BAR }
+class CoerceBazToBar {
+  static Bar asType(Baz self, Class<Bar> clazz) {
+    return Bar.valueOf(self.name())
+  }
+}
+```
+
+
+
+<a name="number-of-iterations"></a>
+
+## 迭代次数
+
+迭代次数取决于可用数据的数量。对同一方法的连续执行可能产生不同数量的迭代。如果一个数据提供程序比其他提供程序更早耗尽数值，将会引发异常。变量赋值不会影响迭代次数。一个仅包含赋值的 `where:` 块将产生恰好一次迭代。
+
+
+
+<a name="closing-of-data-providers"></a>
+
+## 数据提供程序的关闭
+
+在所有迭代完成后，对于所有具有零参数 `close` 方法的数据提供程序将调用该方法。
+
+
+
+<a name="unrolled-iteration-names"></a>
+
+## 展开的迭代名称
+
+默认情况下，展开的迭代名称由特性的名称、数据变量和迭代索引组成。这将始终产生唯一的名称，并且应该能够轻松地识别出失败的数据变量组合。
+
+例如，[失败的报告](/docs/data-driven-testing#reporting-of-failures) 中的示例显示了`最多两个数字[a: 7, b: 4, c: 7, #1]`，其中第二次迭代 (`#1`)失败了，其数据变量取值为 `7`、`4` 和`7` 。
+
+通过一些改进，我们可以做得更好：
+
+```groovy
+def "maximum of #a and #b is #c"() {
+...
+```
+
+这种方法名称使用占位符来表示数据变量`a`、`b` 和 `c`，占位符以 `#` 号开头。在输出中，这些占位符将被具体的值替代：
+
+```bash
+maximum of 1 and 3 is 3   PASSED
+maximum of 7 and 4 is 7   FAILED
+
+Math.max(a, b) == c
+|    |   |  |  |  |
+|    |   7  4  |  7
+|    42        false
+class java.lang.Math
+
+maximum of 0 and 0 is 0   PASSED
+```
+
+现在我们一眼就能看出 `max` 方法在输入为 `7` 和 `4` 时失败了。
+
+展开的方法名类似于 Groovy 的 `GString`，但有以下区别：
+
+- 表达式用 `#` 号表示，而不是 `$` 号，并且没有相应的 `${...}`语法。
+
+- 表达式仅支持属性访问和零参数方法调用。
+
+假设有一个具有 `name` 和 `age` 属性的 `Person` 类，以及一个类型为 `Person` 的数据变量 `person`，以下是有效的方法名：
+
+
+
+```groovy
+def "#person is #person.age years old"() { // property access
+def "#person.name.toUpperCase()"() { // zero-arg method call
+```
+
+非字符串值（例如上面的 `#person`）根据 Groovy 语义转换为字符串。
+
+以下是无效的方法名：
+
+```groovy
+def "#person.name.split(' ')[1]" {  // cannot have method arguments
+def "#person.age / 2" {  // cannot use operators
+```
+
+如果需要，可以引入额外的数据变量来保存更复杂的表达式：
+
+```groovy
+def "#lastName"() {
+  ...
+  where:
+  person << [new Person(age: 14, name: 'Phil Cole')]
+  lastName = person.name.split(' ')[1]
+}
+```
+
+此外，还支持数据变量 `#featureName` 和 `#iterationIndex`。前者在实际特性名称内没有太多意义，但在定义展开模式的另外两个位置上更有用。
+
+```groovy
+def "#person is #person.age years old [#iterationIndex]"() {
+```
+
+将被报告为：
+
+
+
+```bash
+╷
+└─ Spock ✔
+   └─ PersonSpec ✔
+      └─ #person.name is #person.age years old [#iterationIndex] ✔
+         ├─ Fred is 38 years old [0] ✔
+         ├─ Wilma is 36 years old [1] ✔
+         └─ Pebbles is 5 years old [2] ✔
+```
+
+另外，可以将展开模式作为参数传递给 `@Unroll` 注解，而不是在方法名中指定，该注解的优先级高于方法名：
+
+
+
+```groovy
+@Unroll("#featureName[#iterationIndex] (#person.name is #person.age years old)")
+def "person age should be calculated properly"() {
+// ...
+```
+
+将被报告为：
+
+```bash
+╷
+└─ Spock ✔
+   └─ PersonSpec ✔
+      └─ person age should be calculated properly ✔
+         ├─ person age should be calculated properly[0] (Fred is 38 years old) ✔
+         ├─ person age should be calculated properly[1] (Wilma is 36 years old) ✔
+         └─ person age should be calculated properly[2] (Pebbles is 5 years old) ✔
+```
+
+优势在于，你可以为整个特性设置一个描述性的方法名，同时为每个迭代单独设置一个模板。此外，特性方法名不包含占位符，因此更易读。
+
+如果既没有给注解传递参数，也没有在方法名中包含 `#`，则会检查配置文件中展开部分的 `defaultPattern` 设置。如果它设置为非空字符串，则将使用该值作为展开模式。例如，可以将其设置为：
+
+- `#featureName` 以使所有迭代具有相同的名称，或
+
+- `#featureName[#iterationIndex]` 以获得简单的索引迭代名称，或
+
+- `#iterationName` 如果您确保在每个数据驱动的特性中还设置了一个名为 `iterationName` 的数据变量，那么该变量将用于报告。
+
+
+
+<a name="unroll-tokens"></a>
+
+### 特殊标记
+
+以下是特殊标记的完整列表：
+
+- `#featureName` 是特性的名称（在 `defaultPattern` 设置中通常很有用）
+
+- `#iterationIndex` 是当前迭代的索引
+- `#dataVariables` 列出了该迭代的所有数据变量，例如 `x: 1, y: 2, z: 3`
+- `#dataVariablesWithIndex` 与 `#dataVariables` 相同，但在末尾带有索引，例如 `x: 1, y: 2, z: 3, #0`
+
+
+
+<a name="configuration"></a>
+
+### 配置
+
+#### 设置默认的展开模式
+
+```groovy
+unroll {
+    defaultPattern '#featureName[#iterationIndex]'
+}
+```
+
+
+
+如果没有使用上述三种方式之一来设置自定义的展开模式，默认情况下将使用特性名称，后跟所有数据变量的名称和它们的值，最后是迭代索引，因此结果可能为 `my feature [x: 1, y: 2, z: 3, #0]`。
+
+如果展开表达式中存在错误，例如变量名称拼写错误，表达式中的属性或方法在评估过程中引发异常等等，测试将失败。但如果没有以任何方式设置展开模式，则无论发生什么情况， 自动回退的数据变量呈现将永远不会导致测试失败。
+
+可以通过将配置文件中展开部分的 `validateExpressions` 设置为 `false` 来禁用带有展开表达式错误的测试失败。如果这样做并发生错误，错误的表达式 `#foo.bar` 将被替换为 `#Error:foo.bar`。
+
+
+
+#### 禁用展开模式表达式断言
+
+
+
+```groovy
+unroll {
+    validateExpressions false
+}
+```
+
+
+
+某些报告框架或集成开发环境（IDE）支持适当的基于树的报告。对于这些情况，可能希望在迭代报告中省略特性名称。
+
+
+
+#### 禁用迭代中的特性名称
+
+```groovy
+unroll {
+    includeFeatureNameForIterations false
+}
+```
+
+
+
+使用 `includeFeatureNameForIterations true`
+
+```groovy
+╷
+└─ Spock ✔
+   └─ ASpec ✔
+      └─ really long and informative test name that doesn't have to be repeated ✔
+         ├─ really long and informative test name that doesn't have to be repeated [x: 1, y: a, #0] ✔
+         ├─ really long and informative test name that doesn't have to be repeated [x: 2, y: b, #1] ✔
+         └─ really long and informative test name that doesn't have to be repeated [x: 3, y: c, #2] ✔
+```
+
+
+
+使用`includeFeatureNameForIterations false`
+
+```groovy
+╷
+└─ Spock ✔
+   └─ ASpec ✔
+      └─ really long and informative test name that doesn't have to be repeated ✔
+         ├─ x: 1, y: a, #0 ✔
+         ├─ x: 2, y: b, #1 ✔
+         └─ x: 3, y: c, #2 ✔
+```
+
+> 对于单个特性，可以通过使用 `@Unroll('#dataVariablesWithIndex')` 来实现相同的效果。

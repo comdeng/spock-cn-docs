@@ -4,7 +4,8 @@ header{width:100%;padding:10px 40px;clear:both}
 #logo-container .logo{width:100px;}
 #logo-docs{display:inline;padding:10px 0;font-size:50px;}
 main {position:relative}
-main .article-nav{width:200px;position:absolute;left:20px;top:0;}
+main .article-nav{width:320px;position:absolute;left:20px;top:0;}
 main .article-nav h2{margin-top:0}
-main .article-container{margin:10px 20px 20px 210px;}
+main .article-container{margin:10px 40px 20px 350px;}
+main .article-container h1{margin-top:0;}
 table{width:100%}
